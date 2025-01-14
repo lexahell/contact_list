@@ -76,12 +76,7 @@ function handleFormSubmit(form, actionType = 'add') {
       }
 
       const letter = contact.name[0].toLowerCase();
-      const contactList = document.querySelector(
-        `[data-id="${letter}"] .contact__list`
-      );
-      const itemCount = document.querySelector(
-        `[data-id="${letter}"] .item__button-count`
-      );
+      const { contactList, itemCount } = getContactListAndItemCount(letter);
 
       addContact(contact);
       renderContactList(contactList, itemCount, letter);
@@ -102,91 +97,6 @@ function validateForm(form) {
   }
 
   return isValid;
-}
-
-function updateContactInDOM(prevContact, contact) {
-  const prevLetter = prevContact.name[0].toLowerCase();
-  const letter = contact.name[0].toLowerCase();
-  const contactList = document.querySelector(
-    `[data-id="${letter}"] .contact__list`
-  );
-  const itemCount = document.querySelector(
-    `[data-id="${letter}"] .item__button-count`
-  );
-
-  renderContactItemByDataAttribute(contact, 'edit', true);
-  renderContactList(contactList, itemCount, prevLetter);
-  renderContactList(contactList, itemCount, letter);
-}
-
-function renderContactItemByDataAttribute(contact, attribute, value) {
-  const contactItem = document.querySelector(`[data-${attribute}="${value}"]`);
-  updateContactItem(contactItem, contact);
-
-  const editButton = contactItem.querySelector('.contact__edit-btn');
-  editButton.addEventListener('click', () => {
-    editForm.dataset.name = contact.name;
-    editForm.dataset.vacancy = contact.vacancy;
-    editForm.dataset.phone = contact.phone;
-    showModal('.edit-modal');
-  });
-}
-
-function updateContactItem(contactItem, contact) {
-  contactItem.querySelector(
-    '.contact__name'
-  ).textContent = `Имя: ${contact.name}`;
-  contactItem.querySelector(
-    '.contact__vacancy'
-  ).textContent = `Должность: ${contact.vacancy}`;
-  contactItem.querySelector(
-    '.contact__phone'
-  ).textContent = `Телефон: ${contact.phone}`;
-}
-
-function renderContactsInModal(contacts) {
-  const contactList = document.querySelector('.search-modal__list');
-  const contactTemplate = document.querySelector('#contact-template');
-
-  contactList.innerHTML = '';
-
-  contacts.forEach((contact) => {
-    const contactItem = contactTemplate.content
-      .cloneNode(true)
-      .querySelector('.contact');
-    const editButton = contactItem.querySelector('.contact__edit-btn');
-    editButton.classList.add('active');
-
-    updateContactItem(contactItem, contact);
-
-    contactItem
-      .querySelector('.contact__delete-btn')
-      .addEventListener('click', () => {
-        const letter = contact.name[0].toLowerCase();
-        const contactList = document.querySelector(
-          `[data-id="${letter}"] .contact__list`
-        );
-        const itemCount = document.querySelector(
-          `[data-id="${letter}"] .item__button-count`
-        );
-
-        removeContact(contact);
-        renderContactsInModal(getAll());
-        renderContactList(contactList, itemCount, contact.name[0]);
-      });
-
-    editButton.addEventListener('click', () => {
-      editForm.dataset.name = contact.name;
-      editForm.dataset.vacancy = contact.vacancy;
-      editForm.dataset.phone = contact.phone;
-      contactItem.dataset.edit = true;
-      showEditModal('.edit-modal', contact, () => {
-        contactItem.removeAttribute('data-edit');
-      });
-    });
-
-    contactList.appendChild(contactItem);
-  });
 }
 
 function showFormError(message) {
@@ -244,6 +154,114 @@ function showInputError(input, placeholder) {
   input.placeholder = placeholder;
   input.classList.add('input-error');
   setTimeout(() => input.classList.remove('input-error'), 3000);
+}
+
+function updateContactInDOM(prevContact, contact) {
+  const letter = contact.name[0].toLowerCase();
+  const prevLetter = prevContact.name[0].toLowerCase();
+
+  const { contactList, itemCount } = getContactListAndItemCount(letter);
+  const { contactList: prevContactList, itemCount: prevItemCount } =
+    getContactListAndItemCount(prevLetter);
+
+  renderContactList(contactList, itemCount, letter);
+  renderContactList(prevContactList, prevItemCount, prevLetter);
+  renderContactItemByDataAttribute(contact, 'edit', true);
+}
+
+function renderContactItemByDataAttribute(contact, attribute, value) {
+  const contactItem = document.querySelector(`[data-${attribute}="${value}"]`);
+  updateContactItem(contactItem, contact);
+  const editButton = contactItem.querySelector('.contact__edit-btn');
+  const newEditButton = editButton.cloneNode(true);
+  editButton.parentNode.replaceChild(newEditButton, editButton);
+
+  newEditButton.addEventListener('click', () => {
+    editForm.dataset.name = contact.name;
+    editForm.dataset.vacancy = contact.vacancy;
+    editForm.dataset.phone = contact.phone;
+    showModal('.edit-modal');
+  });
+}
+
+function updateContactItem(contactItem, contact) {
+  const deleteButton = contactItem.querySelector('.contact__delete-btn');
+  const newDeleteButton = deleteButton.cloneNode(true);
+  deleteButton.parentNode.replaceChild(newDeleteButton, deleteButton);
+
+  contactItem.querySelector(
+    '.contact__name'
+  ).textContent = `Имя: ${contact.name}`;
+  contactItem.querySelector(
+    '.contact__vacancy'
+  ).textContent = `Должность: ${contact.vacancy}`;
+  contactItem.querySelector(
+    '.contact__phone'
+  ).textContent = `Телефон: ${contact.phone}`;
+
+  newDeleteButton.addEventListener('click', () => {
+    const letter = contact.name[0].toLowerCase();
+    const { contactList, itemCount } = getContactListAndItemCount(letter);
+
+    removeContact(contact);
+    renderContactsInModal(getAll());
+    renderContactList(contactList, itemCount, contact.name[0]);
+  });
+}
+
+function renderContactsInModal(contacts) {
+  const contactList = document.querySelector('.search-modal__list');
+  const contactTemplate = document.querySelector('#contact-template');
+
+  contactList.innerHTML = '';
+
+  contacts.forEach((contact) => {
+    const contactItem = contactTemplate.content
+      .cloneNode(true)
+      .querySelector('.contact');
+    const editButton = contactItem.querySelector('.contact__edit-btn');
+    editButton.classList.add('active');
+
+    updateContactItem(contactItem, contact);
+
+    contactItem
+      .querySelector('.contact__delete-btn')
+      .addEventListener('click', () => {
+        const letter = contact.name[0].toLowerCase();
+        const contactList = document.querySelector(
+          `[data-id="${letter}"] .contact__list`
+        );
+        const itemCount = document.querySelector(
+          `[data-id="${letter}"] .item__button-count`
+        );
+
+        removeContact(contact);
+        renderContactsInModal(getAll());
+        renderContactList(contactList, itemCount, contact.name[0]);
+      });
+
+    editButton.addEventListener('click', () => {
+      editForm.dataset.name = contact.name;
+      editForm.dataset.vacancy = contact.vacancy;
+      editForm.dataset.phone = contact.phone;
+      contactItem.dataset.edit = true;
+      showEditModal('.edit-modal', contact, () => {
+        contactItem.removeAttribute('data-edit');
+      });
+    });
+
+    contactList.appendChild(contactItem);
+  });
+}
+
+function getContactListAndItemCount(letter) {
+  const contactList = document.querySelector(
+    `[data-id="${letter}"] .contact__list`
+  );
+  const itemCount = document.querySelector(
+    `[data-id="${letter}"] .item__button-count`
+  );
+  return { contactList, itemCount };
 }
 
 function renderMainTable() {
