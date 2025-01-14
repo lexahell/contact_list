@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./styles/reset.css" />
+    <link rel="stylesheet" href="./styles/style.css" />
+    <script src="scripts/contacts.js" type="module" defer></script>
+    <script src="scripts/index.js" type="module" defer></script>
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">Contact List</h1>
+      <a href="/">Github Repository link</a>
+    </header>
+    <main class="main">
+      <form class="main__form form" name="add-contact" action="" novalidate>
+        <div class="form__container">
+          <input
+            class="form__input"
+            type="text"
+            name="name"
+            placeholder="Name"
+          />
+          <input
+            class="form__input"
+            type="text"
+            name="vacancy"
+            placeholder="Vacancy"
+          />
+          <input
+            class="form__input"
+            type="tel"
+            name="phone"
+            placeholder="Phone +XXXXXX..."
+          />
+          <div class="form__buttons">
+            <button type="submit" class="form__button add-button">ADD</button>
+            <button type="button" class="form__button clear-button">
+              Clear List
+            </button>
+            <button type="button" class="form__button search-button">
+              Search
+            </button>
+          </div>
+        </div>
+        <div class="form__error-container">
+          <div class="form__error">asdasdqdasdas</div>
+        </div>
+      </form>
+      <div class="main__table-container">
+        <div class="main__table">
+          <div class="table__column column-first"></div>
+          <div class="table__column column-second"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="search-modal modal">
+      <div class="search-modal__content">
+        <button class="modal-close">X</button>
+        <h2 class="modal__title">Search contact</h2>
+        <input
+          type="text"
+          class="search-modal__input"
+          placeholder="Search..."
+        />
+        <div class="search-modal__list-container">
+          <ul class="search-modal__list"></ul>
+        </div>
+        <div class="search-modal__button-container">
+          <button type="button" class="search-modal__show-all">Show All</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-modal modal">
+      <div class="edit_modal__content">
+        <button class="modal-close">X</button>
+        <h2 class="modal__title">Edit Contact</h2>
+        <form
+          class="edit-modal__form"
+          name="edit-contact"
+          action=""
+          novalidate
+          data-name=""
+          data-phone=""
+          data-vacancy=""
+        >
+          <input
+            type="text"
+            name="name"
+            class="edit-modal__input edit-modal__name"
+            placeholder="Name"
+          />
+          <input
+            type="text"
+            name="vacancy"
+            class="edit-modal__input edit-modal__vacancy"
+            placeholder="Vacancy"
+          />
+          <input
+            type="tel"
+            name="phone"
+            class="edit-modal__input edit-modal__phone"
+            placeholder="Phone +XXXXXX..."
+          />
+          <button type="submit" class="form__button edit-modal__button">
+            Edit
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <template id="table-item-template">
+      <div class="table-item">
+        <button type="button" class="item__button">
+          <span class="item__button-name"></span>
+          <span class="item__button-count"></span>
+        </button>
+        <ul class="contact__list" hidden></ul>
+      </div>
+    </template>
+    <template id="contact-template">
+      <div class="contact">
+        <div class="contact__data">
+          <div class="contact__name"></div>
+          <div class="contact__vacancy"></div>
+          <div class="contact__phone"></div>
+        </div>
+        <div class="contact__buttons">
+          <button class="contact__edit-btn contact__button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="edit-icon contact__icon"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M15.49 7.3h-1.16v6.35H1.67V3.28H8V2H1.67A1.21 1.21 0 0 0 .5 3.28v10.37a1.21 1.21 0 0 0 1.17 1.25h12.66a1.21 1.21 0 0 0 1.17-1.25z"
+              />
+              <path
+                d="M10.56 2.87 6.22 7.22l-.44.44-.08.08-1.52 3.16a1.08 1.08 0 0 0 1.45 1.45l3.14-1.53.53-.53.43-.43 4.34-4.36.45-.44.25-.25a2.18 2.18 0 0 0 0-3.08 2.17 2.17 0 0 0-1.53-.63 2.19 2.19 0 0 0-1.54.63l-.7.69-.45.44zM5.51 11l1.18-2.43 1.25 1.26zm2-3.36 3.9-3.91 1.3 1.31L8.85 9zm5.68-5.31a.91.91 0 0 1 .65.27.93.93 0 0 1 0 1.31l-.25.24-1.3-1.3.25-.25a.88.88 0 0 1 .69-.25z"
+              />
+            </svg>
+          </button>
+          <button class="contact__delete-btn contact__button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              class="delete-icon contact__icon"
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M0 0v512h512V0H0zm462.452 462.452H49.548V49.548h412.903v412.904z"
+              />
+              <path
+                d="m355.269 191.767-35.036-35.036L256 220.964l-64.233-64.233-35.036 35.036L220.964 256l-64.233 64.233 35.036 35.036L256 291.036l64.233 64.233 35.036-35.036L291.036 256z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </template>
+  </body>
+</html>
