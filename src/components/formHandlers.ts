@@ -1,3 +1,4 @@
+import { Contact } from 'src/types/Contact.js';
 import {
   isContactExists,
   addContact,
@@ -11,17 +12,29 @@ import {
   renderContactsInModal,
   updateContactInDOM,
 } from './domHandlers.js';
+import { ActionType } from 'src/types/ActionType.js';
 
-function handleFormSubmit(form, actionType = 'add') {
-  return (e) => {
+function handleFormSubmit(
+  form: HTMLFormElement,
+  actionType: ActionType = 'add'
+) {
+  return (e: Event) => {
     e.preventDefault();
 
-    const { name, vacancy, phone } = form;
+    const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+    const vacancyInput = form.elements.namedItem('vacancy') as HTMLInputElement;
+    const phoneInput = form.elements.namedItem('phone') as HTMLInputElement;
+
+    if (!nameInput || !vacancyInput || !phoneInput) {
+      return;
+    }
+
     const contact = {
-      name: name.value.trim(),
-      vacancy: vacancy.value.trim(),
-      phone: phone.value.trim(),
+      name: nameInput.value.trim(),
+      vacancy: vacancyInput.value.trim(),
+      phone: phoneInput.value.trim(),
     };
+
     const withShowError = actionType === 'add';
 
     if (!validateForm(form, withShowError)) {
@@ -33,14 +46,15 @@ function handleFormSubmit(form, actionType = 'add') {
         return;
       }
 
-      const inputValue = document
-        .querySelector('.search-modal__input')
-        .value.trim();
+      const inputElement = document.querySelector(
+        '.search-modal__input'
+      ) as HTMLInputElement;
+      const inputValue = inputElement.value.trim();
       const prevContact = {
         name: form.dataset.name,
         vacancy: form.dataset.vacancy,
         phone: form.dataset.phone,
-      };
+      } as Contact;
 
       editContact(prevContact, contact);
 
@@ -66,18 +80,32 @@ function handleFormSubmit(form, actionType = 'add') {
       const letter = contact.name[0].toLowerCase();
       const { contactList, itemCount } = getContactListAndItemCount(letter);
 
+      if (!contactList || !itemCount) {
+        return;
+      }
+
       addContact(contact);
       renderContactList(contactList, itemCount, letter);
     }
   };
 }
 
-function validateForm(form, withShowError = false) {
-  const { name, vacancy, phone } = form;
+function validateForm(
+  form: HTMLFormElement,
+  withShowError: boolean = false
+): boolean {
+  const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+  const vacancyInput = form.elements.namedItem('vacancy') as HTMLInputElement;
+  const phoneInput = form.elements.namedItem('phone') as HTMLInputElement;
+
+  if (!nameInput || !vacancyInput || !phoneInput) {
+    return false;
+  }
+
   const isValid = [
-    validateInput(name, 'text'),
-    validateInput(vacancy, 'text'),
-    validateInput(phone, 'phone'),
+    validateInput(nameInput, 'text'),
+    validateInput(vacancyInput, 'text'),
+    validateInput(phoneInput, 'phone'),
   ].every(Boolean);
 
   if (!isValid && withShowError) {
@@ -87,15 +115,15 @@ function validateForm(form, withShowError = false) {
   return isValid;
 }
 
-function showFormError(message) {
-  const formError = document.querySelector('.form__error');
+function showFormError(message: string): void {
+  const formError = document.querySelector('.form__error') as HTMLElement;
 
   formError.textContent = message;
   formError.classList.add('active');
   setTimeout(() => formError.classList.remove('active'), 3000);
 }
 
-function validateInput(input, type) {
+function validateInput(input: HTMLInputElement, type: string): boolean {
   const MIN_TEXT_LENGTH = 2;
   const MAX_TEXT_LENGTH = 20;
   const MIN_PHONE_LENGTH = 5;
@@ -104,7 +132,9 @@ function validateInput(input, type) {
   const valueLength = value.length;
 
   if (!value) {
-    return showInputError(input, 'Empty input');
+    showInputError(input, 'Empty input');
+
+    return false;
   }
 
   if (type === 'text') {
@@ -142,7 +172,7 @@ function validateInput(input, type) {
   return true;
 }
 
-function showInputError(input, placeholder) {
+function showInputError(input: HTMLInputElement, placeholder: string): void {
   input.value = '';
   input.placeholder = placeholder;
   input.classList.add('input-error');

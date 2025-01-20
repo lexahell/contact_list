@@ -1,6 +1,9 @@
-let contacts = {};
+import { Contact } from 'src/types/Contact';
+import { Contacts } from 'src/types/Contacts';
 
-function addContact(contact) {
+let contacts: Contacts = {};
+
+function addContact(contact: Contact): void {
   const firstLetter = contact.name[0].toLowerCase();
 
   if (!contacts[firstLetter]) {
@@ -13,7 +16,7 @@ function addContact(contact) {
   }
 }
 
-function isContactExists(contact) {
+function isContactExists(contact: Contact): boolean {
   if (!contacts[contact.name[0].toLowerCase()]) {
     return false;
   }
@@ -25,14 +28,14 @@ function isContactExists(contact) {
   );
 }
 
-function editContact(prevContact, newContact) {
+function editContact(prevContact: Contact, newContact: Contact): void {
   if (isContactExists(prevContact) && !isContactExists(newContact)) {
     removeContact(prevContact);
     addContact(newContact);
   }
 }
 
-function removeContact(contact) {
+function removeContact(contact: Contact): void {
   const firstLetter = contact.name[0].toLowerCase();
 
   if (!contacts[firstLetter]) {
@@ -54,16 +57,16 @@ function removeContact(contact) {
   saveContactsToLocalStorage();
 }
 
-function getAll() {
+function getAll(): Contact[] {
   return Object.values(contacts).flat();
 }
 
-function getContactsByLetter(letter) {
+function getContactsByLetter(letter: string): Contact[] {
   return contacts[letter.toLowerCase()] || [];
 }
 
-function getContactsByQuery(query) {
-  const results = [];
+function getContactsByQuery(query: string): Contact[] {
+  const results: Contact[] = [];
 
   if (query === '') {
     return results;
@@ -89,7 +92,7 @@ function getContactsByQuery(query) {
   return results;
 }
 
-function fillContactsFromLocalStorage() {
+function fillContactsFromLocalStorage(): void {
   const storedContacts = localStorage.getItem('contacts');
 
   if (storedContacts) {
@@ -97,11 +100,11 @@ function fillContactsFromLocalStorage() {
   }
 }
 
-function saveContactsToLocalStorage() {
+function saveContactsToLocalStorage(): void {
   localStorage.setItem('contacts', JSON.stringify(contacts));
 }
 
-function clearContacts() {
+function clearContacts(): void {
   localStorage.removeItem('contacts');
   contacts = {};
 }

@@ -1,0 +1,14 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "lexahell",
+  "license": "ISC",
+  "description": "Contact List",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
