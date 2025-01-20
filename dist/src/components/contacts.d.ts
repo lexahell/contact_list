@@ -1,0 +1,10 @@
+import { Contact } from 'src/types/Contact';
+declare function addContact(contact: Contact): void;
+declare function isContactExists(contact: Contact): boolean;
+declare function editContact(prevContact: Contact, newContact: Contact): void;
+declare function removeContact(contact: Contact): void;
+declare function getAll(): Contact[];
+declare function getContactsByLetter(letter: string): Contact[];
+declare function getContactsByQuery(query: string): Contact[];
+declare function clearContacts(): void;
+export { addContact, removeContact, getContactsByLetter, getContactsByQuery, editContact, clearContacts, getAll, isContactExists, };
