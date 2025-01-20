@@ -4,15 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact List</title>
-    <link rel="stylesheet" href="./styles/reset.css" />
-    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="stylesheet" href="styles/reset.css" />
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/header.css" />
+    <link rel="stylesheet" href="styles/form.css" />
+    <link rel="stylesheet" href="styles/table.css" />
+    <link rel="stylesheet" href="styles/contact.css" />
+    <link rel="stylesheet" href="styles/modal.css" />
     <script src="scripts/contacts.js" type="module" defer></script>
-    <script src="scripts/index.js" type="module" defer></script>
+    <script src="scripts/domHandlers.js" type="module" defer></script>
+    <script src="scripts/formHandlers.js" type="module" defer></script>
+    <script src="scripts/main.js" type="module" defer></script>
   </head>
   <body>
     <header class="header">
       <h1 class="header__title">Contact List</h1>
-      <a href="https://github.com/lexahell/contact_list" target="_blank">Github Repository link</a>
+      <a href="https://github.com/lexahell/contact_list" target="_blank"
+        >Github Repository link</a
+      >
     </header>
     <main class="main">
       <form class="main__form form" name="add-contact" action="" novalidate>
@@ -46,20 +56,32 @@
           </div>
         </div>
         <div class="form__error-container">
-          <div class="form__error">asdasdqdasdas</div>
+          <div class="form__error"></div>
         </div>
       </form>
       <div class="main__table-container">
         <div class="main__table">
-          <div class="table__column column-first"></div>
-          <div class="table__column column-second"></div>
+          <div class="table__column column-left"></div>
+          <div class="table__column column-right"></div>
         </div>
       </div>
     </main>
 
     <div class="search-modal modal">
       <div class="search-modal__content">
-        <button class="modal-close">X</button>
+        <button class="modal-close">
+          <svg
+            style="pointer-events: none"
+            class="modal-close__icon"
+            xmlns="http://www.w3.org/2000/svg"
+            xml:space="preserve"
+            viewBox="0 0 490 490"
+          >
+            <path
+              d="M456.851 0 245 212.564 33.149 0 .708 32.337l211.961 212.667L.708 457.678 33.149 490 245 277.443 456.851 490l32.441-32.322-211.961-212.674L489.292 32.337z"
+            />
+          </svg>
+        </button>
         <h2 class="modal__title">Search contact</h2>
         <input
           type="text"
@@ -77,17 +99,21 @@
 
     <div class="edit-modal modal">
       <div class="edit_modal__content">
-        <button class="modal-close">X</button>
+        <button class="modal-close">
+          <svg
+            class="modal-close__icon"
+            xmlns="http://www.w3.org/2000/svg"
+            xml:space="preserve"
+            viewBox="0 0 490 490"
+            style="pointer-events: none"
+          >
+            <path
+              d="M456.851 0 245 212.564 33.149 0 .708 32.337l211.961 212.667L.708 457.678 33.149 490 245 277.443 456.851 490l32.441-32.322-211.961-212.674L489.292 32.337z"
+            />
+          </svg>
+        </button>
         <h2 class="modal__title">Edit Contact</h2>
-        <form
-          class="edit-modal__form"
-          name="edit-contact"
-          action=""
-          novalidate
-          data-name=""
-          data-phone=""
-          data-vacancy=""
-        >
+        <form class="edit-modal__form" name="edit-contact" action="" novalidate>
           <input
             type="text"
             name="name"
@@ -125,9 +151,9 @@
     <template id="contact-template">
       <div class="contact">
         <div class="contact__data">
-          <div class="contact__name"></div>
-          <div class="contact__vacancy"></div>
-          <div class="contact__phone"></div>
+          <div class="contact__name contact__field"></div>
+          <div class="contact__vacancy contact__field"></div>
+          <div class="contact__phone contact__field"></div>
         </div>
         <div class="contact__buttons">
           <button class="contact__edit-btn contact__button">

@@ -1,0 +1,14 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header__title {
+  margin-top: 1.25rem;
+  margin-bottom: 0.625rem;
+  font-weight: bold;
+  font-size: 1.875rem;
+}

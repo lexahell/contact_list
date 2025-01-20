@@ -1,160 +1,5 @@
-import {
-  addContact,
-  clearContacts,
-  editContact,
-  getAll,
-  getContactsByLetter,
-  getContactsByQuery,
-  isContactExists,
-  removeContact,
-} from './contacts.js';
-
-const searchButton = document.querySelector('.search-button');
-const clearButton = document.querySelector('.clear-button');
-const showAllButton = document.querySelector('.search-modal__show-all');
-const searchModalInput = document.querySelector('.search-modal__input');
-const addForm = document.forms['add-contact'];
+import { getContactsByLetter, removeContact, getAll } from './contacts.js';
 const editForm = document.forms['edit-contact'];
-
-searchModalInput.addEventListener('input', () => {
-  const inputValue = searchModalInput.value.trim();
-  renderContactsInModal(getContactsByQuery(inputValue));
-});
-
-showAllButton.addEventListener('click', () => {
-  renderContactsInModal(getAll());
-});
-
-searchButton.addEventListener('click', () => {
-  showModal('.search-modal');
-});
-
-clearButton.addEventListener('click', () => {
-  clearContacts();
-  renderMainTable();
-});
-
-addForm.addEventListener('submit', handleFormSubmit(addForm, 'add'));
-editForm.addEventListener('submit', handleFormSubmit(editForm, 'edit'));
-
-function handleFormSubmit(form, actionType = 'add') {
-  return (e) => {
-    e.preventDefault();
-
-    const { name, vacancy, phone } = form;
-    const contact = {
-      name: name.value.trim(),
-      vacancy: vacancy.value.trim(),
-      phone: phone.value.trim(),
-    };
-
-    if (
-      !validateForm(form) ||
-      (actionType === 'edit' && isContactExists(contact))
-    ) {
-      return;
-    }
-
-    if (actionType === 'edit') {
-      const prevContact = {
-        name: form.dataset.name,
-        vacancy: form.dataset.vacancy,
-        phone: form.dataset.phone,
-      };
-
-      if (editContact(prevContact, contact)) {
-        updateContactInDOM(prevContact, contact);
-        hideModal('.edit-modal');
-      }
-      return;
-    }
-
-    if (actionType === 'add') {
-      if (isContactExists(contact)) {
-        showFormError("Contact List can't contain 2 equals contacts");
-        return;
-      }
-
-      const letter = contact.name[0].toLowerCase();
-      const { contactList, itemCount } = getContactListAndItemCount(letter);
-
-      addContact(contact);
-      renderContactList(contactList, itemCount, letter);
-    }
-  };
-}
-
-function validateForm(form) {
-  const { name, vacancy, phone } = form;
-  const isValid = [
-    validateInput(name, 'text'),
-    validateInput(vacancy, 'text'),
-    validateInput(phone, 'phone'),
-  ].every(Boolean);
-
-  if (!isValid) {
-    showFormError('Error');
-  }
-
-  return isValid;
-}
-
-function showFormError(message) {
-  const formError = document.querySelector('.form__error');
-  formError.textContent = message;
-  formError.classList.add('active');
-  setTimeout(() => formError.classList.remove('active'), 3000);
-}
-
-function validateInput(input, type) {
-  const value = input.value.trim();
-  const valueLength = value.length;
-
-  if (!value) {
-    return showInputError(input, 'Empty input');
-  }
-
-  if (type === 'text') {
-    if (!/^[a-zA-Z\s]+$/.test(value)) {
-      showInputError(input, 'Invalid value');
-      return false;
-    }
-
-    if (valueLength < 2) {
-      showInputError(input, "Can't be less than 2 symbols");
-      return false;
-    }
-
-    if (valueLength > 20) {
-      showInputError(input, "Can't be more than 20 symbols");
-      return false;
-    }
-  } else if (type === 'phone') {
-    if (!value.startsWith('+') || !/^\d+$/.test(value.slice(1))) {
-      showInputError(input, 'Invalid phone number');
-      return false;
-    }
-
-    if (valueLength < 5) {
-      showInputError(input, "Can't be less than 5 symbols");
-      return false;
-    }
-
-    if (valueLength > 30) {
-      showInputError(input, "Can't be more than 30 symbols");
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function showInputError(input, placeholder) {
-  input.value = '';
-  input.placeholder = placeholder;
-  input.classList.add('input-error');
-  setTimeout(() => input.classList.remove('input-error'), 3000);
-}
 
 function updateContactInDOM(prevContact, contact) {
   const letter = contact.name[0].toLowerCase();
@@ -171,6 +16,11 @@ function updateContactInDOM(prevContact, contact) {
 
 function renderContactItemByDataAttribute(contact, attribute, value) {
   const contactItem = document.querySelector(`[data-${attribute}="${value}"]`);
+
+  if (!contactItem) {
+    return;
+  }
+
   updateContactItem(contactItem, contact);
   const editButton = contactItem.querySelector('.contact__edit-btn');
   const newEditButton = editButton.cloneNode(true);
@@ -186,8 +36,12 @@ function renderContactItemByDataAttribute(contact, attribute, value) {
 
 function updateContactItem(contactItem, contact) {
   const deleteButton = contactItem.querySelector('.contact__delete-btn');
+  const editButton = contactItem.querySelector('.contact__edit-btn');
   const newDeleteButton = deleteButton.cloneNode(true);
+  const newEditButton = editButton.cloneNode(true);
+
   deleteButton.parentNode.replaceChild(newDeleteButton, deleteButton);
+  editButton.parentNode.replaceChild(newEditButton, editButton);
 
   contactItem.querySelector(
     '.contact__name'
@@ -207,9 +61,19 @@ function updateContactItem(contactItem, contact) {
     renderContactsInModal(getAll());
     renderContactList(contactList, itemCount, contact.name[0]);
   });
+
+  newEditButton.addEventListener('click', () => {
+    editForm.dataset.name = contact.name;
+    editForm.dataset.vacancy = contact.vacancy;
+    editForm.dataset.phone = contact.phone;
+    contactItem.dataset.edit = true;
+    showEditModal('.edit-modal', contact, () => {
+      contactItem.removeAttribute('data-edit');
+    });
+  });
 }
 
-function renderContactsInModal(contacts) {
+function renderContactsInModal(contacts = []) {
   const contactList = document.querySelector('.search-modal__list');
   const contactTemplate = document.querySelector('#contact-template');
 
@@ -265,20 +129,21 @@ function getContactListAndItemCount(letter) {
 }
 
 function renderMainTable() {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  const firstColumn = document.querySelector('.column-first');
-  const secondColumn = document.querySelector('.column-second');
+  const leftColumnLetters = 'abcdefghijklm';
+  const rightColumnLetters = 'nopqrstuvwxyz';
+  const leftColumn = document.querySelector('.column-left');
+  const rightColumn = document.querySelector('.column-right');
 
-  firstColumn.innerHTML = '';
-  secondColumn.innerHTML = '';
+  leftColumn.innerHTML = '';
+  rightColumn.innerHTML = '';
 
-  renderColumn(firstColumn, alphabet.slice(0, alphabet.length / 2));
-  renderColumn(secondColumn, alphabet.slice(alphabet.length / 2));
+  renderColumn(leftColumn, leftColumnLetters);
+  renderColumn(rightColumn, rightColumnLetters);
 }
 
 function renderColumn(column, letters) {
   const template = document.querySelector('#table-item-template');
-  const frag = document.createDocumentFragment();
+  const fragment = document.createDocumentFragment();
 
   for (let letter of letters) {
     const item = template.content.cloneNode(true).querySelector('.table-item');
@@ -303,10 +168,10 @@ function renderColumn(column, letters) {
       contactList.hidden = !contactList.hidden;
     });
 
-    frag.appendChild(item);
+    fragment.appendChild(item);
   }
 
-  column.appendChild(frag);
+  column.appendChild(fragment);
 }
 
 function renderContactList(contactList, itemCount, letter) {
@@ -351,14 +216,17 @@ function showEditModal(modalClass, contact, onClose) {
 
 function showModal(modalClass, onClose = () => {}) {
   const modal = document.querySelector(modalClass);
-  modal.classList.add('active');
-  document.body.classList.add('no-scroll');
-  modal.addEventListener('pointerdown', (e) => {
+  const handlePointerDown = (e) => {
     if (e.target === modal || e.target.classList.contains('modal-close')) {
       hideModal(modalClass);
       onClose();
+      modal.removeEventListener('pointerdown', handlePointerDown);
     }
-  });
+  };
+  modal.classList.add('active');
+  document.body.classList.add('no-scroll');
+
+  modal.addEventListener('pointerdown', handlePointerDown);
 }
 
 function hideModal(modalClass) {
@@ -367,4 +235,16 @@ function hideModal(modalClass) {
   document.body.classList.remove('no-scroll');
 }
 
-renderMainTable();
+export {
+  updateContactInDOM,
+  renderContactItemByDataAttribute,
+  updateContactItem,
+  renderContactsInModal,
+  getContactListAndItemCount,
+  renderMainTable,
+  renderColumn,
+  renderContactList,
+  showEditModal,
+  showModal,
+  hideModal,
+};

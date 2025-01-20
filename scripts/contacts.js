@@ -1,6 +1,4 @@
 let contacts = {};
-fillContactsFromLocalStorage();
-
 
 function addContact(contact) {
   const firstLetter = contact.name[0].toLowerCase();
@@ -31,10 +29,7 @@ function editContact(prevContact, newContact) {
   if (isContactExists(prevContact) && !isContactExists(newContact)) {
     removeContact(prevContact);
     addContact(newContact);
-    return true;
   }
-  
-  return false;
 }
 
 function removeContact(contact) {
@@ -60,14 +55,7 @@ function removeContact(contact) {
 }
 
 function getAll() {
-  let allContacts = [];
-  for (let letter of Object.keys(contacts)) {
-    for (let contact of contacts[letter]) {
-      allContacts.push(contact);
-    }
-  }
-
-  return allContacts;
+  return Object.values(contacts).flat();
 }
 
 function getContactsByLetter(letter) {
@@ -75,18 +63,25 @@ function getContactsByLetter(letter) {
 }
 
 function getContactsByQuery(query) {
-  const queryLower = query.toLowerCase();
-  const firstLetter = queryLower[0];
   const results = [];
 
-  if (!contacts[firstLetter]) {
+  if (query === '') {
     return results;
   }
 
-  for (let contact of contacts[firstLetter]) {
-    const name = contact.name.toLowerCase();
+  const queryLower = query.toLowerCase();
+  const allContacts = getAll();
 
-    if (name.startsWith(queryLower)) {
+  for (let contact of allContacts) {
+    const name = contact.name.toLowerCase();
+    const vacancy = contact.vacancy.toLowerCase();
+    const phone = contact.phone.toLowerCase();
+
+    if (
+      name.startsWith(queryLower) ||
+      vacancy.startsWith(queryLower) ||
+      phone.startsWith(queryLower)
+    ) {
       results.push(contact);
     }
   }
@@ -110,6 +105,8 @@ function clearContacts() {
   localStorage.removeItem('contacts');
   contacts = {};
 }
+
+fillContactsFromLocalStorage();
 
 export {
   addContact,
